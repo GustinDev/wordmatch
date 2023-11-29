@@ -3,79 +3,109 @@ package application.controller;
 import application.model.GameModel;
 import application.view.GameView;
 import javafx.collections.ObservableList;
-import application.model.GameModel.WordPair;
 
-/**
- * La clase GameController maneja la lógica de interacción entre el modelo y la vista.
- */
+// Clase GameController que actúa como el controlador en el patrón MVC
 public class GameController {
-    private GameModel model;
-    private GameView view;
+    private GameModel model; // Referencia al modelo del juego
+    private GameView view; // Referencia a la vista del juego
+    private String currentTheme; // Tema actual seleccionado
+    private int score; // Puntuación actual en el juego
+    private String selectedCardEnglish; // Palabra seleccionada en inglés
+    private String selectedCardSpanish; // Palabra seleccionada en español
 
-    /**
-     * Constructor de GameController que establece el modelo y la vista.
-     * @param model El modelo del juego.
-     * @param view La vista del juego.
-     */
+    // Constructor de GameController
     public GameController(GameModel model, GameView view) {
         this.model = model;
         this.view = view;
-        this.view.setController(this);
-        this.view.updateWordLists(model.getWordPairs());
-        this.view.updateScore(model.getScore());
-
-        // Configura los eventos de clic en las listas
-        setupListClickHandlers();
+        this.view.setController(this); // Asignar este controlador a la vista
+        this.score = 0;
+        this.selectedCardEnglish = null;
+        this.selectedCardSpanish = null;
+        onModeSelected("Aprender"); // Iniciar en modo "Aprender"
     }
 
-    /**
-     * Configura los manejadores de eventos de clic para las listas de palabras.
-     */
-    private void setupListClickHandlers() {
-        view.getListEnglish().setOnMouseClicked(e -> {
-            int selectedIndex = view.getListEnglish().getSelectionModel().getSelectedIndex();
-            if (selectedIndex != -1) {
-                WordPair selectedPair = model.getWordPairs().get(selectedIndex);
-                checkPair(selectedPair, view.getListSpanish().getSelectionModel().getSelectedItem());
-            }
-        });
-
-        view.getListSpanish().setOnMouseClicked(e -> {
-            int selectedIndex = view.getListSpanish().getSelectionModel().getSelectedIndex();
-            if (selectedIndex != -1) {
-                WordPair selectedPair = model.getWordPairs().get(selectedIndex);
-                checkPair(selectedPair, view.getListEnglish().getSelectionModel().getSelectedItem());
-            }
-        });
+    // Obtener el modelo del juego
+    public GameModel getModel() {
+        return model;
     }
 
-    /**
-     * Verifica si las palabras seleccionadas son una pareja correcta.
-     * @param selectedPair El par de palabras seleccionado.
-     * @param selectedWord La palabra seleccionada en la otra lista.
-     */
-    private void checkPair(WordPair selectedPair, String selectedWord) {
-        if (selectedPair != null && selectedWord != null) {
-            if (selectedPair.getEnglishWord().equals(selectedWord) || selectedPair.getSpanishWord().equals(selectedWord)) {
-                model.correctPair();
-                model.removeWordPair(selectedPair);
-            } else {
-                model.incorrectPair();
-            }
-            view.updateWordLists(model.getWordPairs());
-            view.updateScore(model.getScore());
-            checkEndGame();
+    // Obtener el tema actual
+    public String getCurrentTheme() {
+        return currentTheme;
+    }
+    
+    // Método llamado cuando se selecciona un modo de juego
+    public void onModeSelected(String mode) {
+        currentTheme = "Animales"; // Restablecer el tema a "Animales" al cambiar de modo
+        view.updateThemeSelection(currentTheme); // Actualizar la selección del tema en la vista
+        view.updateMode(mode); // Actualizar el modo en la vista
+        if ("Aprender".equals(mode)) {
+            onThemeSelected(currentTheme);
+        } else {
+            score = 0; // Restablecer puntuación al cambiar de modos
+            view.updateScore(score);
+            preparePlayMode();
         }
     }
 
-    /**
-     * Verifica si el juego ha terminado y actualiza la interfaz de usuario con un mensaje de fin de juego.
-     */
-    private void checkEndGame() {
-        ObservableList<WordPair> pairs = model.getWordPairs();
-        if (pairs.isEmpty()) {
-            boolean hasWon = model.getScore() > 0;
-            view.showEndGameMessage(hasWon);
+    // Método llamado cuando se selecciona un tema
+    public void onThemeSelected(String theme) {
+        currentTheme = theme;
+        if (view.getCurrentMode().equals("Aprender")) {
+            ObservableList<GameModel.WordPair> words = model.getWordsByTheme(theme);
+            view.updateWordLists(words, theme); // Actualizar la lista de palabras en la vista
+        } else {
+            score = 0; // Restablecer puntuación al cambiar temas en modo jugar
+            view.updateScore(score);
+            preparePlayMode();
         }
+    }
+
+    // Preparar la vista para el modo de juego
+    public void preparePlayMode() {
+        String currentTheme = getCurrentTheme();
+        view.setupPlayMode(currentTheme);
+    }
+
+    // Método llamado cuando se selecciona una carta
+    public void onCardSelected(String word, String language) {
+        if ("English".equals(language)) {
+            selectedCardEnglish = word;
+            if (selectedCardSpanish != null) {
+                checkPair();
+            }
+        } else {
+            selectedCardSpanish = word;
+            if (selectedCardEnglish != null) {
+                checkPair();
+            }
+        }
+    }
+
+    // Verificar si las cartas seleccionadas forman un par correcto
+    private void checkPair() {
+        ObservableList<GameModel.WordPair> pairs = model.getWordsByTheme(currentTheme);
+        boolean matchFound = pairs.stream()
+                                  .anyMatch(pair -> pair.getEnglishWord().equals(selectedCardEnglish) &&
+                                                    pair.getSpanishWord().equals(selectedCardSpanish));
+        if (matchFound) {
+            score++; // Aumentar la puntuación si las cartas coinciden
+            view.removeCards(selectedCardEnglish, selectedCardSpanish); // Remover las cartas coincidentes
+        } else {
+            score--; // Disminuir la puntuación si las cartas no coinciden
+        }
+        view.updateScore(score); // Actualizar la puntuación en la vista
+        selectedCardEnglish = null;
+        selectedCardSpanish = null;
+        if (view.allCardsRemoved()) {
+            view.showEndGameMessage(score > 0 ? "¡Ganaste!" : "Perdiste, tu puntuación es negativa.");
+        }
+    }
+
+    // Reiniciar el juego
+    public void resetGame() {
+        score = 0; // Restablecer la puntuación al reiniciar
+        view.updateScore(score);
+        preparePlayMode(); // Preparar la vista para un nuevo juego
     }
 }

@@ -1,1 +1,63 @@
 /* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
+
+/* Estilo general para la aplicación */
+.root {
+  -fx-font-family: 'Arial';
+  -fx-base: #ffffff;
+}
+
+/* Estilo para los títulos de las secciones */
+.text, .label {
+  -fx-font-size: 16px;
+  -fx-font-weight: bold;
+}
+
+/* Estilo para los botones del modo de juego */
+.button {
+  -fx-background-color: #f0e68c;
+  -fx-border-color: #000000;
+  -fx-border-width: 2px;
+  -fx-font-weight: bold;
+}
+
+.button:hover {
+  -fx-background-color: #ffd700;
+}
+
+/* Estilo para los botones de radio */
+.radio-button {
+  -fx-padding: 5px;
+}
+
+/* Estilo para los botones de tarjetas en el modo Jugar */
+.card-button {
+  -fx-background-color: #ffffff;
+  -fx-border-color: #000000;
+  -fx-border-width: 1px;
+}
+
+/* Estilo para el texto de puntuación */
+#scoreText {
+  -fx-font-size: 20px;
+  -fx-font-weight: bold;
+}
+
+/* Estilo para las cajas que contienen los temas y las palabras */
+#topicsBox, #wordsBox {
+  -fx-background-color: #ffffff;
+  -fx-border-color: #000000;
+  -fx-border-width: 2px;
+  -fx-padding: 10px;
+}
+
+/* Estilo para la barra superior con los botones de modo de juego */
+#modeButtonsBox {
+  -fx-background-color: #f0e68c;
+  -fx-border-color: #000000;
+  -fx-border-width: 2px;
+}
+
+/* Estilo para el panel principal */
+#layout {
+  -fx-background-color: #ffffff;
+}

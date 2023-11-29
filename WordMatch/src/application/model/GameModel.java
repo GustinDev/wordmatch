@@ -3,85 +3,73 @@ package application.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-/**
- * La clase GameModel maneja los datos del juego, incluyendo las palabras y la puntuación.
- */
+// Clase GameModel que actúa como el modelo en el patrón MVC para la aplicación
 public class GameModel {
-    // Lista observable de pares de palabras inglés-español.
-    private ObservableList<WordPair> wordPairs;
-    // Puntuación actual del juego.
-    private int score;
+    // Listas observables para almacenar pares de palabras en diferentes categorías
+    private ObservableList<WordPair> animals; // Lista para animales
+    private ObservableList<WordPair> professions; // Lista para profesiones
+    private ObservableList<WordPair> places; // Lista para lugares
 
-    /**
-     * Constructor de GameModel que inicializa la lista de palabras y establece la puntuación inicial.
-     */
+    // Constructor de GameModel
     public GameModel() {
-        // Inicialización de la lista de pares de palabras.
-        wordPairs = FXCollections.observableArrayList(
-            new WordPair("House", "Casa"),
-            new WordPair("Dog", "Perro"),
-            new WordPair("Car", "Coche")
+        // Inicialización de la lista de animales con pares de palabras
+        animals = FXCollections.observableArrayList(
+            new WordPair("Gato", "Cat", "kat"),
+            new WordPair("Perro", "Dog", "dɔɡ"),
+            new WordPair("Pato", "Duck", "dʌk"),
+            new WordPair("Pez", "Fish", "fɪʃ"),
+            new WordPair("Rana", "Frog", "frɔɡ")
         );
-        // Inicialización de la puntuación a 0.
-        score = 0;
+
+        // Inicialización de la lista de profesiones con pares de palabras
+        professions = FXCollections.observableArrayList(
+            new WordPair("Doctor", "Doctor", "ˈdɒktər"),
+            new WordPair("Profesor", "Teacher", "ˈtiːtʃər"),
+            new WordPair("Policía", "Police", "pəˈliːs"),
+            new WordPair("Cocinero", "Cook", "kʊk"),
+            new WordPair("Ingeniero", "Engineer", "ˌendʒɪˈnɪər")
+        );
+
+        // Inicialización de la lista de lugares con pares de palabras
+        places = FXCollections.observableArrayList(
+            new WordPair("Ciudad", "City", "ˈsɪti"),
+            new WordPair("País", "Country", "ˈkʌntri"),
+            new WordPair("Parque", "Park", "pɑːrk"),
+            new WordPair("Restaurante", "Restaurant", "ˈrɛstrɒnt"),
+            new WordPair("Escuela", "School", "skuːl")
+        );
     }
 
-    /**
-     * Obtiene la lista observable de pares de palabras.
-     * @return Una lista observable de WordPair.
-     */
-    public ObservableList<WordPair> getWordPairs() {
-        return wordPairs;
+    // Método para obtener palabras basadas en el tema seleccionado
+    public ObservableList<WordPair> getWordsByTheme(String theme) {
+        switch (theme) {
+            case "Animales":
+                return animals;
+            case "Profesiones":
+                return professions;
+            case "Lugares":
+                return places;
+            default:
+                return FXCollections.observableArrayList(); // Retorna una lista vacía si no coincide ningún tema
+        }
     }
 
-    /**
-     * Obtiene la puntuación actual.
-     * @return Puntuación actual como entero.
-     */
-    public int getScore() {
-        return score;
-    }
-
-    /**
-     * Incrementa la puntuación en 1.
-     */
-    public void correctPair() {
-        score++;
-    }
-
-    /**
-     * Decrementa la puntuación en 1, permitiendo puntuaciones negativas.
-     */
-    public void incorrectPair() {
-        score--;
-    }
-
-    /**
-     * Elimina un par de palabras de la lista de pares.
-     * @param pair El par de palabras a eliminar.
-     */
-    public void removeWordPair(WordPair pair) {
-        wordPairs.remove(pair);
-    }
-
-    /**
-     * Clase interna para manejar pares de palabras.
-     */
+    // Clase interna WordPair para almacenar pares de palabras en español e inglés y su pronunciación
     public static class WordPair {
-        private final String englishWord;
-        private final String spanishWord;
+        private String spanishWord; // Palabra en español
+        private String englishWord; // Palabra correspondiente en inglés
+        private String pronunciation; // Pronunciación de la palabra en inglés
 
-        public WordPair(String englishWord, String spanishWord) {
-            this.englishWord = englishWord;
+        // Constructor de WordPair
+        public WordPair(String spanishWord, String englishWord, String pronunciation) {
             this.spanishWord = spanishWord;
+            this.englishWord = englishWord;
+            this.pronunciation = pronunciation;
         }
 
-        public String getEnglishWord() {
-            return englishWord;
-        }
-
-        public String getSpanishWord() {
-            return spanishWord;
-        }
+        // Getters para los campos de WordPair
+        public String getSpanishWord() { return spanishWord; }
+        public String getEnglishWord() { return englishWord; }
+        public String getPronunciation() { return pronunciation; }
     }
 }
